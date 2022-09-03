@@ -22,8 +22,8 @@ const navigation = [
   { name: "Q&A", href: "/questions", current: false },
 ];
 const userNavigation = [
-  { name: "My page", href: "/myPage" },
-  { name: "Sign out", href: "/sing-out" },
+  { name: "마이페이지", href: "/myPage" },
+  // { name: "Sign out", href: "/sing-out" },
 ];
 
 function classNames(...classes) {
@@ -34,8 +34,7 @@ export default function Gnb() {
   const user = useSelector((state) => state.user.user);
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const onLogOutHandler = (e) => {
-    e.preventDefault();
+  const onSignOutHandler = () => {
     signOut(auth);
     router.push("/");
   };
@@ -102,7 +101,7 @@ export default function Gnb() {
                               <Image src="/images/profile.png" alt="프로필" layout="fill" objectFit="cover" />
                             </Menu.Button>
                           ) : (
-                            <Link href="/log-in">
+                            <Link href="/sign-in">
                               <a className="text-white">
                                 <FaDoorOpen size={25} />
                               </a>
@@ -124,23 +123,34 @@ export default function Gnb() {
                                 {({ active }) => (
                                   // 경고로 인한 a태그 onclick으로 이동
                                   // <Link href={item.href}>
-                                  <a
-                                    onClick={(e) => {
-                                      e.preventDefault();
+                                  <button
+                                    onClick={() => {
                                       router.push(item.href);
                                     }}
-                                    href=""
                                     className={classNames(
                                       active ? "bg-gray-100" : "",
-                                      "block px-4 py-2 text-sm text-gray-700"
+                                      "block px-4 py-2 text-sm text-gray-700 w-full text-left"
                                     )}
                                   >
                                     {item.name}
-                                  </a>
+                                  </button>
                                   // </Link>
                                 )}
                               </Menu.Item>
                             ))}
+                            <Menu.Item key="로그아웃">
+                              {({ active }) => (
+                                <button
+                                  onClick={onSignOutHandler}
+                                  className={classNames(
+                                    active ? "bg-gray-100" : "",
+                                    "block px-4 py-2 text-sm text-gray-700 w-full text-left"
+                                  )}
+                                >
+                                  로그아웃
+                                </button>
+                              )}
+                            </Menu.Item>
                           </Menu.Items>
                         </Transition>
                       </Menu>
@@ -207,17 +217,45 @@ export default function Gnb() {
                         </Link>
                       </div>
                       <div className="mt-3 space-y-1 px-2">
-                        {userNavigation.map((item) => (
-                          <Link href={item.href} key={item.name}>
+                        {isLoggedIn &&
+                          userNavigation.map((item) => (
+                            <Link href={item.href} key={item.name}>
+                              <Disclosure.Button
+                                onClick={() => close()}
+                                as="a"
+                                className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                              >
+                                {item.name}
+                              </Disclosure.Button>
+                            </Link>
+                          ))}
+
+                        {isLoggedIn ? (
+                          <Link href="sign-out" key="로그아웃">
                             <Disclosure.Button
-                              onClick={() => close()}
+                              onClick={(e) => {
+                                onSignOutHandler(e);
+                                close();
+                              }}
                               as="a"
                               className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                             >
-                              {item.name}
+                              로그아웃
                             </Disclosure.Button>
                           </Link>
-                        ))}
+                        ) : (
+                          <Link href="/sign-in" key="로그인">
+                            <Disclosure.Button
+                              onClick={(e) => {
+                                close();
+                              }}
+                              as="a"
+                              className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                            >
+                              로그인
+                            </Disclosure.Button>
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </>
