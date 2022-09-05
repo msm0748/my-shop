@@ -38,7 +38,6 @@ export default function Gnb() {
     signOut(auth);
     router.push("/");
   };
-  console.log("렌더링");
   useEffect(() => {
     if (user) {
       setIsLoggedIn(true);

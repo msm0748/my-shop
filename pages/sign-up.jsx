@@ -4,6 +4,7 @@ import * as yup from "yup";
 import { auth, db } from "../fBase.js";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { addDoc, collection } from "firebase/firestore";
+import { useRouter } from "next/router";
 
 const validationSchema = yup.object().shape({
   name: yup.string().required("이름은 필수 입력 항목입니다."),
@@ -18,18 +19,19 @@ const validationSchema = yup.object().shape({
 });
 
 export default function SignUp() {
+  const router = useRouter();
   const formik = useFormik({
     initialValues: {
       name: "",
       email: "",
       password: "",
       password_confirmation: "",
+      all_check: false,
       agreeCheck1: false,
       agreeCheck2: false,
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log(values);
       const { name, email, password } = values;
       try {
         await createUserWithEmailAndPassword(auth, email, password);
@@ -44,7 +46,6 @@ export default function SignUp() {
         await addDoc(collection(db, "user"), {
           name,
           email,
-          phone,
           createdAt: Date.now(),
         });
         alert("회원가입에 성공했습니다.");
@@ -55,6 +56,11 @@ export default function SignUp() {
       }
     },
   });
+  const onCheckAllHandler = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue("agreeCheck1", e.target.checked);
+    formik.setFieldValue("agreeCheck2", e.target.checked);
+  };
   return (
     <div>
       <div className="flex flex-col items-center min-h-screen pt-6 sm:justify-center sm:pt-0">
@@ -142,12 +148,9 @@ export default function SignUp() {
                   name="all_check"
                   type="checkbox"
                   className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  // onChange={(e) => {
-                  //   console.log(formik.values);
-                  //   console.log(e.target.checked);
-                  //   formik.setFieldValue("agreeCheck1", e.target.checked);
-                  //   formik.setFieldValue("agreeCheck2", e.target.checked);
-                  // }}
+                  onChange={onCheckAllHandler}
+                  onBlur={formik.handleBlur}
+                  checked={formik.values.agreeCheck1 === true && formik.values.agreeCheck2 === true}
                 />
                 <label htmlFor="all_check" className="ml-2 block text-sm text-gray-900">
                   모두 동의합니다.
@@ -161,6 +164,7 @@ export default function SignUp() {
                   className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
+                  checked={formik.values.agreeCheck1}
                 />
                 <label htmlFor="agreeCheck1" className="ml-2 block text-sm text-gray-900">
                   (필수){" "}
@@ -182,12 +186,14 @@ export default function SignUp() {
                   className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
+                  checked={formik.values.agreeCheck2}
                 />
                 <label htmlFor="agreeCheck2" className="ml-2 block text-sm text-gray-900">
                   (필수) 만 14세 이상입니다.
                 </label>
               </div>
             </div>
+            {/* 한번에 두개 에러 표출이 안됨 */}
             {formik.touched.agreeCheck1 && formik.errors.agreeCheck1 && (
               <p className="text-red-600 mt-2">{formik.errors.agreeCheck1}</p>
             )}

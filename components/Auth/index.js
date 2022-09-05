@@ -21,8 +21,8 @@ export default function Auth() {
                 email: data.email,
                 name: data.name,
                 phone: data.phone,
-                addressInfo: data.addressInfo,
-                detailAddressInfo: data.detailAddressInfo,
+                address: data.address,
+                detailAddress: data.detailAddress,
                 docId: doc.id,
                 uid,
               })
