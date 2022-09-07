@@ -5,6 +5,7 @@ import { auth, db } from "../fBase.js";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { addDoc, collection } from "firebase/firestore";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 const validationSchema = yup.object().shape({
   name: yup.string().required("이름은 필수 입력 항목입니다."),
@@ -20,6 +21,12 @@ const validationSchema = yup.object().shape({
 
 export default function SignUp() {
   const router = useRouter();
+  const [doubleSubmitFlag, setDoubleSubmitFlag] = useState(true); // 중복 submit 제거
+  const onKakaoSignUpHandler = () => {
+    router.push(
+      "https://kauth.kakao.com/oauth/authorize?client_id=74a4303eee0b4f4a236a6e528ab42fbe&redirect_uri=http://localhost:3000/oauth/kakao&response_type=code"
+    );
+  };
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -32,27 +39,33 @@ export default function SignUp() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      const { name, email, password } = values;
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        const errCode = err.code;
-        alert(errCode);
-        return false;
-      }
-      // 아래 코드 경우의 수 체크해봐야 함
-      // ex) 위 코드가 성공이고 아래코드가 실패일때
-      try {
-        await addDoc(collection(db, "user"), {
-          name,
-          email,
-          createdAt: Date.now(),
-        });
-        alert("회원가입에 성공했습니다.");
-        router.push("/");
-      } catch (err) {
-        alert(err);
-        return false;
+      setDoubleSubmitFlag(false);
+      if (doubleSubmitFlag === true) {
+        const { name, email, password } = values;
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+          const errCode = err.code;
+          setDoubleSubmitFlag(true);
+          alert(errCode);
+          return false;
+        }
+        // 아래 코드 경우의 수 체크해봐야 함
+        // ex) 위 코드가 성공이고 아래코드가 실패일때
+        try {
+          await addDoc(collection(db, "user"), {
+            name,
+            email,
+            createdAt: Date.now(),
+          });
+          alert("회원가입에 성공했습니다.");
+          router.push("/");
+        } catch (err) {
+          setDoubleSubmitFlag(true);
+          alert(err);
+          return false;
+        }
+        setDoubleSubmitFlag(true);
       }
     },
   });
@@ -228,11 +241,12 @@ export default function SignUp() {
               aria-label="Login with Google"
               type="button"
               className="flex items-center justify-center w-full p-2 space-x-4 border rounded-md focus:ring-2 focus:ring-offset-1 dark:border-gray-400 focus:ring-violet-400"
+              onClick={onKakaoSignUpHandler}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-5 h-5 fill-current">
                 <path d="M16.318 13.714v5.484h9.078c-0.37 2.354-2.745 6.901-9.078 6.901-5.458 0-9.917-4.521-9.917-10.099s4.458-10.099 9.917-10.099c3.109 0 5.193 1.318 6.38 2.464l4.339-4.182c-2.786-2.599-6.396-4.182-10.719-4.182-8.844 0-16 7.151-16 16s7.156 16 16 16c9.234 0 15.365-6.49 15.365-15.635 0-1.052-0.115-1.854-0.255-2.651z"></path>
               </svg>
-              <p>Login with Google</p>
+              <p>Login with 카카오</p>
             </button>
             <button
               aria-label="Login with GitHub"
