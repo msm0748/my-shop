@@ -34,7 +34,7 @@ export default function SignUp() {
     const [doubleSubmitFlag, setDoubleSubmitFlag] = useState(true); // 중복 submit 제거
     const onKakaoSignUpHandler = () => {
         router.push(
-            "https://kauth.kakao.com/oauth/authorize?client_id=74a4303eee0b4f4a236a6e528ab42fbe&redirect_uri=http://localhost:3000/oauth/kakao&response_type=code"
+            "https://kauth.kakao.com/oauth/authorize?client_id=74a4303eee0b4f4a236a6e528ab42fbe&redirect_uri=https://my-shop-brown.vercel.app/oauth/kakao&response_type=code"
         );
     };
     const formik = useFormik({
