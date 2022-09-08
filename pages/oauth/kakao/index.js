@@ -19,15 +19,14 @@ export default function Kakao() {
             params: {
                 grant_type: "authorization_code",
                 client_id: "74a4303eee0b4f4a236a6e528ab42fbe",
-                redirect_uri:
-                    "https://my-shop-o5iodt4gu-msm0748.vercel.app/oauth/kakao",
+                redirect_uri: "/oauth/kakao",
                 code: code,
             },
         });
         const {
             data: { result },
         } = await axios({
-            url: "/api/kakao",
+            url: "/oauth/kakao",
             method: "post",
             data: { access_token: access_token },
             withCredentials: true,
