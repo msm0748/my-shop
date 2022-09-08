@@ -26,7 +26,7 @@ export default function Kakao() {
         const {
             data: { result },
         } = await axios({
-            url: "/oauth/kakao",
+            url: "/api/kakao",
             method: "post",
             data: { access_token: access_token },
             withCredentials: true,
