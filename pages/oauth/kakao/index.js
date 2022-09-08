@@ -19,7 +19,7 @@ export default function Kakao() {
             params: {
                 grant_type: "authorization_code",
                 client_id: "74a4303eee0b4f4a236a6e528ab42fbe",
-                redirect_uri: "/oauth/kakao",
+                redirect_uri: "https://my-shop-brown.vercel.app/oauth/kakao",
                 code: code,
             },
         });
