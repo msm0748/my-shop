@@ -1,16 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   swcMinify: true,
-  // async redirects() {
-  //   return [
-  //     {
-  //       source: "/auth",
-  //       destination: "/",
-  //       parmanent: false,
-  //     },
-  //   ];
-  // },
 };
 
 module.exports = nextConfig;

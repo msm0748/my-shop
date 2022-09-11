@@ -1,22 +1,21 @@
 import axios from "axios";
-
-// import createFirebaseToken from "./kakaoLoginServer.js";
-// import necessary modules
-const request = require("request-promise");
-
 // Firebase setup
-const firebaseAdmin = require("firebase-admin");
+import firebaseAdmin from "firebase-admin";
 // you should manually put your service-account.json in the same folder app.js
 // is located at.
-const serviceAccount = require("./test-988dd-firebase-adminsdk-51eus-b410abd9c2.json");
+import serviceAccount from "./test-988dd-firebase-adminsdk-51eus-b410abd9c2.json";
+import { db } from "../../fBase.js";
+import { addDoc, collection } from "firebase/firestore";
 
 // Kakao API request url to retrieve user profile based on access token
 const requestMeUrl = "https://kapi.kakao.com/v2/user/me?secure_resource=true";
 
 // Initialize FirebaseApp with service-account.json
-firebaseAdmin.initializeApp({
-  credential: firebaseAdmin.credential.cert(serviceAccount),
-});
+if (!firebaseAdmin.apps.length) {
+  firebaseAdmin.initializeApp({
+    credential: firebaseAdmin.credential.cert(serviceAccount),
+  });
+}
 
 /**
  * requestMe - Returns user profile from Kakao API
@@ -26,7 +25,7 @@ firebaseAdmin.initializeApp({
  */
 function requestMe(kakaoAccessToken) {
   console.log("Requesting user profile from Kakao API server.");
-  return request({
+  return axios({
     method: "GET",
     headers: { Authorization: "Bearer " + kakaoAccessToken },
     url: requestMeUrl,
@@ -61,13 +60,20 @@ function updateOrCreateUser(userId, email, displayName, photoURL) {
   return firebaseAdmin
     .auth()
     .updateUser(userId, updateParams)
-    .catch((error) => {
+    .catch(async (error) => {
       if (error.code === "auth/user-not-found") {
         updateParams["uid"] = userId;
         if (email) {
           updateParams["email"] = email;
         }
-        return firebaseAdmin.auth().createUser(updateParams);
+        await addDoc(collection(db, "user"), {
+          name: updateParams.displayName,
+          email: updateParams.email,
+          photoURL: updateParams.photoURL,
+          uid: updateParams.uid,
+          createdAt: Date.now(),
+        });
+        return firebaseAdmin.auth().createUser(updateParams); // 신규 유저 생성
       }
       throw error;
     });
@@ -79,14 +85,15 @@ function updateOrCreateUser(userId, email, displayName, photoURL) {
  * @param  {String} kakaoAccessToken access token from Kakao Login API
  * @return {Promise<String>}                  Firebase token in a promise
  */
-function createFirebaseToken(kakaoAccessToken) {
-  return requestMe(kakaoAccessToken)
+async function createFirebaseToken(kakaoAccessToken) {
+  return await requestMe(kakaoAccessToken)
     .then((response) => {
-      const body = JSON.parse(response);
-      console.log(body, "body");
+      const body = response.data;
       const userId = `kakao:${body.id}`;
       if (!userId) {
-        return res.status(404).send({ message: "There was no user with the given access token." });
+        return res.status(404).send({
+          message: "There was no user with the given access token.",
+        });
       }
       let nickname = null;
       let profileImage = null;
@@ -107,7 +114,7 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     const { access_token } = req.body;
     const result = await createFirebaseToken(access_token);
-    res.status(200).json({
+    return res.status(200).json({
       result,
     });
   }
