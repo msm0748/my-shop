@@ -66,13 +66,13 @@ function updateOrCreateUser(userId, email, displayName, photoURL) {
         if (email) {
           updateParams["email"] = email;
         }
-        await addDoc(collection(db, "user"), {
-          name: updateParams.displayName,
-          email: updateParams.email,
-          photoURL: updateParams.photoURL,
-          uid: updateParams.uid,
-          createdAt: Date.now(),
-        });
+        // await addDoc(collection(db, "user"), {
+        //   name: updateParams.displayName,
+        //   email: updateParams.email,
+        //   photoURL: updateParams.photoURL,
+        //   uid: updateParams.uid,
+        //   createdAt: Date.now(),
+        // });
         return firebaseAdmin.auth().createUser(updateParams); // 신규 유저 생성
       }
       throw error;
