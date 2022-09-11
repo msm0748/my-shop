@@ -89,6 +89,8 @@ async function createFirebaseToken(kakaoAccessToken) {
   return await requestMe(kakaoAccessToken)
     .then((response) => {
       const body = response.data;
+      console.log(body);
+      console.log(body.kakao_account.email);
       const userId = `kakao:${body.id}`;
       if (!userId) {
         return res.status(404).send({
